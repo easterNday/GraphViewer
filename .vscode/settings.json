@@ -1,0 +1,4 @@
+{
+    "python.analysis.typeCheckingMode": "off",
+    "typescript.tsdk": "node_modules/typescript/lib"
+}

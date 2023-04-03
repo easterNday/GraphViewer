@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<meta http-equiv="Access-Control-Allow-Origin" content="http://106.52.142.195:5005">
+		<title>知识图谱可视化</title>
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'css/index.css' %}" type="text/css" />
+		<link rel="stylesheet" href="{% static 'css/robot.css' %}" />
+		<script src="https://cdn.bootcdn.net/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+	</head>
+	<script src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
+	<script src="{% static 'js/flexible.js' %}"></script>
+	<script src="{% static 'js/vue.min.js' %}"></script>
+	<script src="{% static 'js/echarts.min.js' %}"></script>
+	<script src="{% static 'js/kgDraw.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/tagcloud.js' %}"></script>
+	<!-- <script src="js/axios.min.js"></script> -->
+	<script>
+
+		//var n;  //存储nodes的数据
+		//var r;	//存储links的数据
+		//var c;	//存储categories的数据
+		window.onload=function(){
+			//这是原来与KGfile对接的
+			//var kgres=document.getElementById("kgjson");
+		    //var kg1=kgres.innerHTML.toString();
+			//document.write(kg1);
+			//alert("后台数据："+kg1);
+
+			//页面加载完成，调用显示知识图谱
+			//ty();
+		}
+
+
+	function tab(pid){
+	 var tabs=["tab1","tab2","tab3"];
+	 for(var i=0;i<3;i++){
+	 if(tabs[i]==pid){
+	 document.getElementById(tabs[i]).style.display="block";
+	 }else{
+	 document.getElementById(tabs[i]).style.display="none";
+	 }
+	 }
+	 };
+	 function swithStyle(){
+		document.getElementById("visualization").setAttribute("class","visualization_1");
+		document.getElementById("tabNav").style.display="none";
+		document.getElementById("robot").style.display="none";
+		document.getElementById("tab2").style.display="block";
+		document.getElementById("tab3").style.display="block";
+		document.getElementById("tab1").setAttribute("class","tab1_1");
+		document.getElementById("tab2").setAttribute("class","tab2_1");
+		document.getElementById("tab3").setAttribute("class","tab3_1");
+	 };
+	 function tagSearch(btnVal){
+		kg1Draw(btnVal);
+		kg2Draw(btnVal);
+		kg3Draw(btnVal);
+	 }
+
+	 </script>
+	<body>
+		<div class="mainbox">
+			<!-- 侧边栏 -->
+			<div class="sidebar" style="flex:1;">
+				<div class="userInfor">
+					<img src="{% static 'img/logo.png' %}" alt="Profile Photo" class="img-icon">
+					用户名：Admin <br>
+					ID：00001
+				</div>
+				<nav class="left-nav">
+					<ul>
+						<li><a href="#" class="active"><i class="fa fa-home fa-fw"></i>首页</a></li>
+						<li><a href="manage-users.html"><i class="fa fa-users fa-fw"></i>使用说明</a></li>
+						<li><a href="preferences.html"><i class="fa fa-sliders fa-fw"></i>联系我们</a></li>
+						<li><a href="login.html"><i class="fa fa-eject fa-fw"></i>登出</a></li>
+					</ul>
+				</nav>
+			</div>
+			<!-- 主面板 -->
+			<div class="light-gray-bg" style="background-color: lightgray;flex:9;">
+				<div class="top-nav">
+					<header class="site-header">
+						<h1>中华文化知识图谱问答及可视化系统</h1>
+						<span id="kgjson" hidden="hidden">{{ res }}</span>
+					</header>
+				</div>
+				<div class="content-container">
+					<div class="mainpanel" style="flex:7;">
+						<div id="visualization" class="visualization">
+							<div id="tabNav">
+								<ul class="graph_button_group">
+									<li onclick="tab('tab1')">知识图谱</li>
+									<li onclick="tab('tab2')">柱状图</li>
+									<li onclick="tab('tab3')">饼状图</li>
+									<li onclick="swithStyle()">全屏展示</li>
+								</ul>
+							</div>
+							<div id="tab">
+								<div id="tab1" class="tab1" style="display: block;"></div>
+								<div id="tab2" class="tab2" style="display: none;"></div>
+								<div id="tab3" class="tab3" style="display: none;"></div>
+							</div>
+						</div>
+						<div id="robot" style="display: block;">
+							<div id="box">
+								<div class="b-head">
+									<img class="h-img" alt="" src="{% static 'img/logo.png' %}" width=80; height=60; />
+									<span class="h_span">中华文化问答Bot</span>
+								</div>
+								<div class="b-body">
+									<div class="rotWord">
+										<span></span>
+										<p>嗨~你可以问我问题。<br>如：“共工是谁？”</p>
+									</div>
+								</div>
+								<!-- 					<div class="b-footer">
+									<input type="text" id="f-left" v-model="sWord" @keyup.enter="searchGraph" />
+									<button id="btn" @click="searchGraph">发送</button>
+								</div> -->
+								<div class="b-footer">
+									<input type="text" name="text" id="f-left" />
+									<div id="btn">发送</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="cloumn" style="flex:3;">
+						<div class="miniIntro">
+							<div class="r-head">
+								<span class="cloumn_h">知识图谱查询</span>
+							</div>
+							<!-- 下拉框+输入框 -->
+							<div id="KGinput" style="margin: 10px;">
+								<h6>请选择跳数（必选）</h6>
+								<br />
+								选择跳数:
+								<select v-model="selected">
+									<!-- <option disabled value="">请选择跳数</option> -->
+									<option>0跳</option>
+									<option>1跳</option>
+									<option>2跳</option>
+									<option>3跳</option>
+									<option>4跳</option>
+									<option>5跳</option>
+								</select>
+<!--								<span style="font-size: 12px;">选择的跳数: {{ selected }}</span>-->
+								<br />
+								<br />
+								<h6>请输入节点（可选）</h6>
+								<br />
+								<template v-if="seen0">
+									<span style="font-size: 13px;margin-left:20px">第一节点：</span>
+									<input type="text" style="width:100px" v-model="n1" /><br>
+								</template>
+								<template v-if="seen1">
+									<span style="font-size: 13px;margin-left:20px">第二节点：</span>
+									<input type="text" style="width:100px" v-model="n2" /><br>
+								</template>
+								<template v-if="seen2">
+									<span style="font-size: 13px;margin-left:20px">第三节点：</span>
+									<input type="text" style="width:100px" v-model="n3" /><br>
+								</template>
+								<template v-if="seen3">
+									<span style="font-size: 13px;margin-left:20px">第四节点：</span>
+									<input type="text" style="width:100px" v-model="n4" /><br>
+								</template>
+								<template v-if="seen4">
+									<span style="font-size: 13px;margin-left:20px">第五节点：</span>
+									<input type="text" style="width:100px" v-model="n5" /><br>
+								</template>
+								<template v-if="seen5">
+									<span style="font-size: 13px;margin-left:20px">第六节点：</span>
+									<input type="text" style="width:100px" v-model="n6" /><br>
+								</template>
+								<br />
+								<h6>请输入关系（可选）</h6>
+								<br />
+								<template v-if="seen1">
+									<span style="font-size: 13px;margin-left:20px">关系1：</span>
+									<input type="text" style="width:100px" v-model="r1" /><br>
+								</template>
+								<template v-if="seen2">
+									<span style="font-size: 13px;margin-left:20px">关系2：</span>
+									<input type="text" style="width:100px" v-model="r2" /><br>
+								</template>
+								<template v-if="seen3">
+									<span style="font-size: 13px;margin-left:20px">关系3：</span>
+									<input type="text" style="width:100px" v-model="r3" /><br>
+								</template>
+								<template v-if="seen4">
+									<span style="font-size: 13px;margin-left:20px">关系4：</span>
+									<input type="text" style="width:100px" v-model="r4" /><br>
+								</template>
+								<template v-if="seen5">
+									<span style="font-size: 13px;margin-left:20px">关系5：</span>
+									<input type="text" style="width:100px" v-model="r5" /><br>
+								</template>
+								<br />
+								<h6>请输入限制数量（可选）</h6>
+								<br />
+								<span style="font-size: 13px;margin-left:20px">限制数量：</span>
+								<input type="text" style="width:100px" v-model="limit" /><br>
+								<br />
+								<button style="font-size: 13px;margin-left:20px" @click="collect()">确认查询</button>
+							</div>
+						</div>
+						<!-- 搜索历史 -->
+						<div class="searchBox">
+							<div class="r-head">
+								<span class="cloumn_h">搜索历史</span>
+							</div>
+							<div class="tagcloud">
+								<input type="button" value="司马光" onclick="tagSearch(value)" />
+								<input type="button" value="麒麟" onclick="tagSearch(value)" />
+								<input type="button" value="壮族人" onclick="tagSearch(value)" />
+								<input type="button" value="诗经" onclick="tagSearch(value)" />
+								<input type="button" value="客家土楼" onclick="tagSearch(value)" />
+								<input type="button" value="客家方言" onclick="tagSearch(value)" />
+								<input type="button" value="九章算术" onclick="tagSearch(value)" />
+								<input type="button" value="诗经" onclick="tagSearch(value)" />
+								<input type="button" value="范仲淹" onclick="tagSearch(value)" />
+								<input type="button" value="关汉卿" onclick="tagSearch(value)" />
+								<input type="button" value="木偶戏" onclick="tagSearch(value)" />
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+		</div>
+		<script src="{% static 'js/bot.js' %}"></script>
+		<script src="{% static 'js/visualization3.js' %}"></script>
+		<script type="text/javascript">
+			/*3D标签云*/
+			tagcloud({
+				selector: ".tagcloud", //元素选择器
+				fontsize: 8, //基本字体大小, 单位px
+				radius: 50, //滚动半径, 单位px
+				mspeed: "normal", //滚动最大速度, 取值: slow, normal(默认), fast
+				ispeed: "normal", //滚动初速度, 取值: slow, normal(默认), fast
+				direction: 135, //初始滚动方向, 取值角度(顺时针360): 0对应top, 90对应left, 135对应right-bottom(默认)...
+				keep: false //鼠标移出组件后是否继续随鼠标滚动, 取值: false, true(默认) 对应 减速至初速度滚动, 随鼠标滚动
+			});
+		</script>
+		<script>
+			var skip = 0;
+			new Vue({
+				el: '#KGinput',
+				data: {
+					selected: '0跳',
+					seen0: true,
+					seen1: false,
+					seen2: false,
+					seen3: false,
+					seen4: false,
+					seen5: false,
+					n1: '',
+					r1: '',
+					n2: '',
+					r2: '',
+					n3: '',
+					r3: '',
+					n4: '',
+					r4: '',
+					n5: '',
+					r5: '',
+					n6: '',
+					limit: 3
+				},
+				watch: {
+					selected: function(val) {
+						//alert(val);
+						if (val == "0跳") {
+							this.seen0 = true;
+							this.seen1 = false;
+							this.seen2 = false;
+							this.seen3 = false;
+							this.seen4 = false;
+							this.seen5 = false;
+							skip = 0;
+
+						}
+						if (val == "1跳") {
+							this.seen0 = true;
+							this.seen1 = true;
+							this.seen2 = false;
+							this.seen3 = false;
+							this.seen4 = false;
+							this.seen5 = false;
+							skip = 1;
+						}
+						if (val == "2跳") {
+							this.seen0 = true;
+							this.seen1 = true;
+							this.seen2 = true;
+							this.seen3 = false;
+							this.seen4 = false;
+							this.seen5 = false;
+							skip = 2;
+						}
+						if (val == "3跳") {
+							this.seen0 = true;
+							this.seen1 = true;
+							this.seen2 = true;
+							this.seen3 = true;
+							this.seen4 = false;
+							this.seen5 = false;
+							skip = 3;
+						}
+						if (val == "4跳") {
+							this.seen0 = true;
+							this.seen1 = true;
+							this.seen2 = true;
+							this.seen3 = true;
+							this.seen4 = true;
+							this.seen5 = false;
+							skip = 4;
+						}
+						if (val == "5跳") {
+							this.seen0 = true;
+							this.seen1 = true;
+							this.seen2 = true;
+							this.seen3 = true;
+							this.seen4 = true;
+							this.seen5 = true;
+							skip = 5;
+						}
+					}
+				},
+				methods:{
+					collect(){
+						search(skip,this.n1,this.r1,this.n2,this.r2,this.n3,this.r3,this.n4,this.r4,this.n5,this.r5,this.n6,this.limit);
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

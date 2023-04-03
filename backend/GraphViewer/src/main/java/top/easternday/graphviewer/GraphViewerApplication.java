@@ -1,0 +1,13 @@
+package top.easternday.graphviewer;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class GraphViewerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(GraphViewerApplication.class, args);
+	}
+
+}
