@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;  // 导入 Spring
 import org.springframework.stereotype.Service;  // 导入 Spring Framework 提供的 Service 注解
 
 import java.util.*;  // 导入 java.util 包中的相关类
-import com.alibaba.fastjson2.JSON;  // 导入 fastjson 提供的 JSON 类
 
 @Service  // 声明当前类为一个服务类
 public class ERService {
@@ -13,7 +12,7 @@ public class ERService {
     private ERRepo repo;
 
     // 通过给定实体名称查询实体关系信息，并返回 JSON 格式字符串
-    public String getEntityRelationsByEntityName(String name) {
+    public Map<String, Object> getEntityRelationsByEntityName(String name) {
         // 从 ERRepo 实例中查询指定实体名称的实体关系列表
         List<Object[]> list = repo.findEntityRelationsByEntityName(name);
 
@@ -68,6 +67,6 @@ public class ERService {
         finalResult.put("lines", relationsList);
 
         // 将查询结果映射表转为 JSON 格式字符串并返回
-        return JSON.toJSONString(finalResult);
+        return finalResult;
     }
 }

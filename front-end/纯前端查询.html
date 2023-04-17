@@ -20,8 +20,8 @@
     <div id="network"></div>
     <script>
       const driver = neo4j.driver(
-        "bolt://146.56.41.3:7687",
-        neo4j.auth.basic("neo4j", "123456")
+        "bolt://dev.easternday.top:7687",
+        neo4j.auth.basic("neo4j", "password")
       );
       const session = driver.session();
       const query = "MATCH (n)-[r]->(m) WHERE n.name = $name RETURN n,r,m";

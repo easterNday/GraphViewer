@@ -36,7 +36,8 @@ const options = {
 };
 
 const loadJsonData = async (input: string) => {
-  const response = await axiosInstance.get(`/api/${input}`);
+  const response = await axiosInstance.get(`/entities/${input}`);
+  console.log(response.data);
   return response.data;
 };
 
