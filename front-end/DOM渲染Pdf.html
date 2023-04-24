@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>PDF.js 示例</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  </head>
+  <body>
+    <div id="pdfContainer"></div>
+    
+    <script>
+      const pdfUrl = 'http://localhost:8080/pdf2/%E4%B8%AD%E5%9B%BD%E5%8E%86%E5%8F%B2%E5%B8%B8%E8%AF%86';
+      const container = document.getElementById('pdfContainer');
+      const height = 800; // 自定义高度
+      
+      // 加载 PDF 文件
+      pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+        // 将 PDF 呈现到 HTML DOM 中
+        pdf.getPage(18).then(page => {
+          const viewport = page.getViewport({scale: 1});
+          const scale = height / viewport.height;
+          const div = document.createElement('div');
+          div.style.width = viewport.width * scale + 'px';
+          div.style.height = height + 'px';
+          container.appendChild(div);
+          
+          page.getTextContent().then(content => {
+            pdfjsLib.renderTextLayer({
+              textContent: content,
+              container: div,
+              viewport: viewport,
+              textDivs: []
+            });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

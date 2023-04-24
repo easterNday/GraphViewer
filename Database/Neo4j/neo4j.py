@@ -9,7 +9,7 @@ df = pd.read_excel('../Data/triplet.xlsx')
 graph = Graph("bolt://dev.easternday.top:7687", auth=("neo4j", "password"))
 
 # 清空数据库
-#graph.delete_all()
+# graph.delete_all()
 
 # 开始事务
 tx = graph.begin()
